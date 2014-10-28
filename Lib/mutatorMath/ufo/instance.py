@@ -366,7 +366,8 @@ class InstanceWriter(object):
         instanceObject = m.makeInstance(instanceLocationObject)
         if self.roundGeometry:
             instanceObject = instanceObject.round()
-        instanceObject.extractGlyph(targetGlyphObject, onlyGeometry=True)
+        # instanceObject.extractGlyph(targetGlyphObject, onlyGeometry=True)
+        instanceObject.extractGlyph(targetGlyphObject)
 
     def save(self):
         """ Save the UFO."""
