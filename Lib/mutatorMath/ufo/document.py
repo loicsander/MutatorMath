@@ -14,7 +14,7 @@ from mutatorMath.ufo.instance import InstanceWriter
 
 """
 
-    Read and write mutator math designspace files. 
+    Read and write mutator math designspace files.
 
     A DesignSpaceDocumentWriter object can be instructed to write a properly formed
     description of a designspace for UFO fonts.
@@ -41,7 +41,7 @@ class DesignSpaceDocumentWriter(object):
     *   path:   path for the document
     *   toolVersion: version of this tool
     """
-        
+
     def __init__(self, path, toolVersion=3, verbose=False):
         self.path = path
         self.toolVersion = toolVersion
@@ -57,10 +57,10 @@ class DesignSpaceDocumentWriter(object):
         self.endInstance()
         tree = ET.ElementTree(self.root)
         tree.write(self.path, encoding="utf-8", method='xml', xml_declaration=True)
-    
+
     def _makeLocationElement(self, locationObject, name=None):
         """ Convert Location object to an locationElement."""
-        
+
         locElement = ET.Element("location")
         if name is not None:
            locElement.attrib['name'] = name
@@ -74,15 +74,15 @@ class DesignSpaceDocumentWriter(object):
                dimElement.attrib['xvalue'] = "%f"%dimensionValue
            locElement.append(dimElement)
         return locElement
-    
+
     def addSource(self,
             path,
-            name, 
-            location, 
-            copyLib=False, 
-            copyGroups=False, 
-            copyInfo=False, 
-            muteKerning=False, 
+            name,
+            location,
+            copyLib=False,
+            copyGroups=False,
+            copyInfo=False,
+            muteKerning=False,
             muteInfo=False,
             mutedGlyphNames=None,
         ):
@@ -97,7 +97,7 @@ class DesignSpaceDocumentWriter(object):
         *   muteKerning:    mute the kerning data from this source
         *   muteInfo:       mute the font info data from this source
 
-        Note: no separate flag for mute font: the source is just not added. 
+        Note: no separate flag for mute font: the source is just not added.
         """
         sourceElement = ET.Element("source")
         pathRelativeToDocument = os.path.relpath(path, os.path.dirname(self.path))
@@ -114,7 +114,7 @@ class DesignSpaceDocumentWriter(object):
             sourceElement.append(groupsElement)
 
         if copyInfo or muteInfo:
-            # copy info: 
+            # copy info:
             infoElement = ET.Element('info')
             if copyInfo:
                 infoElement.attrib['copy'] = "1"
@@ -151,7 +151,7 @@ class DesignSpaceDocumentWriter(object):
 
             ):
         """ Start a new instance.
-            Instances can need a lot of configuration. 
+            Instances can need a lot of configuration.
             So this method starts a new instance element. Use endInstance() to finish it.
 
             *   name: the name of this instance
@@ -186,16 +186,16 @@ class DesignSpaceDocumentWriter(object):
             instanceElement.attrib['stylemapstylename'] = styleMapStyleName
 
         self.currentInstance = instanceElement
-    
+
     def endInstance(self):
-        """ 
+        """
             Finalise the instance definition started by startInstance().
         """
         if self.currentInstance is None:
             return
         allInstances = self.root.findall('.instances')[0].append(self.currentInstance)
         self.currentInstance = None
-    
+
     def writeGlyph(self,
             name,
             unicodeValue=None,
@@ -203,10 +203,10 @@ class DesignSpaceDocumentWriter(object):
             masters=None,
             note=None
             ):
-        """ Add a new glyph to the current instance. 
+        """ Add a new glyph to the current instance.
             * name: the glyph name. Required.
             * unicodeValue: unicode value for this glyph if it needs to be different from the unicode value associated with this glyph name in the masters.
-            * location: a design space location for this glyph if it needs to be different from the instance location. 
+            * location: a design space location for this glyph if it needs to be different from the instance location.
             * masters: a list of masters and locations for this glyph if they need to be different from the masters specified for this instance.
         """
         if self.currentInstance is None:
@@ -253,7 +253,7 @@ class DesignSpaceDocumentWriter(object):
             locationElement = self._makeLocationElement(location)
             infoElement.append(locationElement)
         self.currentInstance.append(infoElement)
-    
+
     def writeKerning(self, location=None, masters=None):
         """ Write kerning into the current instance.
             Note: the masters attribute is ignored at the moment.
@@ -265,12 +265,12 @@ class DesignSpaceDocumentWriter(object):
             locationElement = self._makeLocationElement(location)
             kerningElement.append(locationElement)
         self.currentInstance.append(kerningElement)
-    
-    
+
+
 class DesignSpaceDocumentReader(object):
     """ Read a designspace description.
         Build Instance objects, generate them.
-        
+
         *   documentPath:   path of the document to read
         *   ufoVersion:     target UFO version
         *   roundGeometry:  apply rounding to all geometry
@@ -281,7 +281,7 @@ class DesignSpaceDocumentReader(object):
     _tempFontLibGlyphMuteKey = "_mutatorMath.temp.mutedGlyphNames"
     _tempFontLocationKey = "_mutatorMath.temp.fontLocation"
 
-    
+
     def __init__(self, documentPath, ufoVersion, roundGeometry=False, verbose=False, logPath=None):
         self.path = documentPath
         self.ufoVersion = ufoVersion
@@ -303,14 +303,14 @@ class DesignSpaceDocumentReader(object):
 
     def process(self, makeGlyphs=True, makeKerning=True, makeInfo=True):
         """ Process the input file and generate the instances. """
-        tree = ET.parse(self.path)        
+        tree = ET.parse(self.path)
         self.root = tree.getroot()
         self.readVersion()
         assert self.documentFormatVersion == 3
         self.readSources()
         self.readInstances(makeGlyphs=makeGlyphs, makeKerning=makeKerning, makeInfo=makeInfo)
         self.logger.info('Done')
-    
+
     def readVersion(self):
         """ Read the document version.
         ::
@@ -318,18 +318,18 @@ class DesignSpaceDocumentReader(object):
         """
         ds = self.root.findall("[@format]")[0]
         self.documentFormatVersion = int(ds.attrib['format'])
-        
+
     def readSources(self):
         """ Read the source elements.
-        
+
         ::
-            
+
             <source filename="LightCondensed.ufo" location="location-token-aaa" name="master-token-aaa1">
                 <info mute="1" copy="1"/>
                 <kerning mute="1"/>
                 <glyph mute="1" name="thirdGlyph"/>
             </source>
-        
+
         """
         for sourceElement in self.root.findall(".sources/source"):
             # shall we just read the UFO here?
@@ -340,7 +340,7 @@ class DesignSpaceDocumentReader(object):
             if not os.path.exists(sourcePath):
                 raise MutatorError("Source not found at %s"%sourcePath)
             sourceObject = self._fontClass(sourcePath)
-            
+
             # read the locations
             sourceLocationObject = None
             for sourceLocationElement in sourceElement.findall('.location'):
@@ -369,7 +369,7 @@ class DesignSpaceDocumentReader(object):
                         self.groupsSource = None
                     else:
                         self.groupsSource = sourceName
-            
+
             # read the info flag
             for infoElement in sourceElement.findall(".info"):
                 if infoElement.attrib.get('copy') == '1':
@@ -393,7 +393,7 @@ class DesignSpaceDocumentReader(object):
                     if not sourceName in self.muted['glyphs']:
                         self.muted['glyphs'][sourceName] = []
                     self.muted['glyphs'][sourceName].append(glyphName)
-            
+
             for kerningElement in sourceElement.findall(".kerning"):
                 if kerningElement.attrib.get('mute') == '1':
                     self.muted['kerning'].append(sourceName)
@@ -402,7 +402,7 @@ class DesignSpaceDocumentReader(object):
             self.sources[sourceName] = sourceObject, sourceLocationObject
 
     def locationFromElement(self, element):
-        """ 
+        """
             Find the MutatorMath location of this element, either by name or from a child element.
         """
         elementLocation = None
@@ -435,16 +435,16 @@ class DesignSpaceDocumentReader(object):
         return loc
 
     def readInstances(self, makeGlyphs=True, makeKerning=True, makeInfo=True):
-        """ Read all instance elements. 
-        
+        """ Read all instance elements.
+
         ::
-        
+
             <instance familyname="SuperFamily" filename="OutputNameInstance1.ufo" location="location-token-aaa" stylename="Regular">
-        
+
         """
         for instanceElement in self.root.findall('.instances/instance'):
             self._readSingleInstanceElement(instanceElement, makeGlyphs=makeGlyphs, makeKerning=makeKerning, makeInfo=makeInfo)
-    
+
     def _readSingleInstanceElement(self, instanceElement, makeGlyphs=True, makeKerning=True, makeInfo=True):
         """ Read a single instance element.
             If we have glyph specifications, only make those.
@@ -459,9 +459,9 @@ class DesignSpaceDocumentReader(object):
         if self.verbose:
             self.logger.info("Writing %s to %s", os.path.basename(filename), instancePath)
 
-        instanceObject = self._instanceWriterClass(instancePath,    
+        instanceObject = self._instanceWriterClass(instancePath,
             ufoVersion=self.ufoVersion,
-            roundGeometry=self.roundGeometry, 
+            roundGeometry=self.roundGeometry,
             verbose=self.verbose,
             logger=self.logger
             )
@@ -492,10 +492,10 @@ class DesignSpaceDocumentReader(object):
 
         if instanceLocation is not None:
             instanceObject.setLocation(instanceLocation)
-        
+
         if makeGlyphs:
 
-            # step 1: generate all glyphs we have mutators for. 
+            # step 1: generate all glyphs we have mutators for.
             names = instanceObject.getAvailableGlyphnames()
             for n in names:
                 unicodeValue = self.unicodeMap.get(n, None)
@@ -526,6 +526,10 @@ class DesignSpaceDocumentReader(object):
                 # copy the groups from the designated source to the new instance
                 # note: setGroups will filter the group members
                 # only glyphs present in the font will be added to the group.
+                if hasattr(groupSourceObject, 'kerningGroupConversionRenameMaps'):
+                    sourceKerningGroupConversionRenameMaps = groupSourceObject.kerningGroupConversionRenameMaps
+                else:
+                    sourceKerningGroupConversionRenameMaps = None
                 instanceObject.setGroups(groupSourceObject.groups, kerningGroupConversionRenameMaps=groupSourceObject.kerningGroupConversionRenameMaps)
 
         # lib items
@@ -533,7 +537,7 @@ class DesignSpaceDocumentReader(object):
             if self.libSource in self.sources:
                 libSourceObject, loc = self.sources[self.libSource]
                 instanceObject.setLib(libSourceObject.lib)
-        
+
         # save the instance. Done.
         instanceObject.save()
         failed = instanceObject.getFailed()
@@ -549,37 +553,37 @@ class DesignSpaceDocumentReader(object):
 
     def readInfoElement(self, infoElement, instanceObject):
         """ Read the info element.
-            
+
             ::
-            
+
                 <info/>
-            
+
                 <info">
                 <location/>
                 </info>
-                
+
             """
         infoLocation = self.locationFromElement(infoElement)
         instanceObject.addInfo(infoLocation, copySourceName=self.infoSource)
-        
+
     def readKerningElement(self, kerningElement, instanceObject):
         """ Read the kerning element.
-        
+
         ::
-                
+
                 Make kerning at the location and with the masters specified at the instance level.
                 <kerning/>
 
         """
         kerningLocation = self.locationFromElement(kerningElement)
         instanceObject.addKerning(kerningLocation)
-                    
+
     def readGlyphElement(self, glyphElement, instanceObject):
         """
-        Read the glyph element. 
-        
+        Read the glyph element.
+
         ::
-        
+
             <glyph name="b" unicode="0x62"/>
 
             <glyph name="b"/>
@@ -592,13 +596,13 @@ class DesignSpaceDocumentReader(object):
                     This is an instance from an anisotropic interpolation.
                 </note>
             </glyph>
-        
+
         """
         # name
         glyphName = glyphElement.attrib.get('name')
         if glyphName is None:
             raise MutatorError("Glyph object without name attribute.")
-        
+
         # unicode
         unicodeValue = glyphElement.attrib.get('unicode')
         if unicodeValue == None:
@@ -608,7 +612,7 @@ class DesignSpaceDocumentReader(object):
                 unicodeValue = int(unicodeValue, 16)
             except ValueError:
                 raise MutatorError("unicode value %s is not integer"%unicodeValue)
-        
+
         # note
         note = None
         for noteElement in glyphElement.findall('.note'):
@@ -617,7 +621,7 @@ class DesignSpaceDocumentReader(object):
 
         # location
         instanceLocation = self.locationFromElement(glyphElement)
-        
+
         # masters
         glyphSources = None
         for masterElement in glyphElement.findall('.masters/master'):
