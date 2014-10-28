@@ -530,7 +530,7 @@ class DesignSpaceDocumentReader(object):
                     sourceKerningGroupConversionRenameMaps = groupSourceObject.kerningGroupConversionRenameMaps
                 else:
                     sourceKerningGroupConversionRenameMaps = None
-                instanceObject.setGroups(groupSourceObject.groups, kerningGroupConversionRenameMaps=groupSourceObject.kerningGroupConversionRenameMaps)
+                instanceObject.setGroups(groupSourceObject.groups, kerningGroupConversionRenameMaps=sourceKerningGroupConversionRenameMaps)
 
         # lib items
         if self.libSource is not None:
