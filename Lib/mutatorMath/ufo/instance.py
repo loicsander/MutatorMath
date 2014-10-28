@@ -10,7 +10,7 @@ from fontMath.mathInfo import MathInfo
 import defcon
 
 class InstanceWriter(object):
-    """ 
+    """
             Simple object to build a UFO instance.
             Collect the data needed for an instance
             and generate it as fast as possible.
@@ -23,14 +23,14 @@ class InstanceWriter(object):
     """
     _fontClass = defcon.objects.font.Font
     _tempFontLibGlyphMuteKey = "_mutatorMath.temp.mutedGlyphNames"
-    
+
     def __init__(self, path, ufoVersion=1, roundGeometry=False, verbose=False, logger=None):
         self.path = path
         # do we check for overwriting?
         self.font = self._fontClass()
         self.ufoVersion = ufoVersion
         self.roundGeometry = roundGeometry
-        self.sources = {} 
+        self.sources = {}
         self.muted = dict(kerning=[], info=[], glyphs={})
         self.familyName = None
         self.styleName = None
@@ -41,7 +41,7 @@ class InstanceWriter(object):
         self.logger=logger
         self._failed = []       # list of glyphnames we could not generate
         self._missingUnicodes = []   # list of glyphnames with missing unicode values
-    
+
     def setSources(self, sources):
         """ Set a list of sources."""
         self.sources = sources
@@ -49,7 +49,7 @@ class InstanceWriter(object):
     def setMuted(self, muted):
         """ Set the mute states. """
         self.muted = muted
-    
+
     def setGroups(self, groups, kerningGroupConversionRenameMaps=None):
         """ Copy the groups into our font. """
         skipping = []
@@ -66,7 +66,7 @@ class InstanceWriter(object):
             if self.verbose and self.logger:
                 self.logger.info("Some glyphs were removed from groups: %s", ", ".join(skipping))
         if kerningGroupConversionRenameMaps:
-            # in case the sources were UFO2, 
+            # in case the sources were UFO2,
             # and defcon upconverted them to UFO3
             # and now we have to down convert them again,
             # we don't want the UFO3 public prefixes in the group names
@@ -100,14 +100,14 @@ class InstanceWriter(object):
     def setStyleName(self, name):
         """ Set the styleName. """
         self.font.info.styleName = name
-    
+
     def setFamilyName(self, name):
         """ Set the familyName"""
         self.font.info.familyName = name
 
     def makeUnicodeMapFromSources(self):
         """ Create a dict with glyphName -> unicode value pairs
-            using the data in the sources. 
+            using the data in the sources.
             If all master glyphs have the same unicode value
             this value will be used in the map.
             If master glyphs have conflicting value, a warning will be printed, no value will be used.
@@ -132,7 +132,7 @@ class InstanceWriter(object):
             k = u.keys()
             self.unicodeValues[name] = k[0]
         return self.unicodeValues
-                
+
     def getAvailableGlyphnames(self):
         """ Return a list of all glyphnames we have masters for."""
         glyphNames = {}
@@ -142,11 +142,11 @@ class InstanceWriter(object):
         names = glyphNames.keys()
         names.sort()
         return names
-    
+
     def setLocation(self, locationObject):
         """ Set the location directly. """
         self.locationObject = locationObject
-    
+
     def addInfo(self, instanceLocation=None, sources=None, copySourceName=None):
         """ Add font info data. """
         if instanceLocation is None:
@@ -178,57 +178,103 @@ class InstanceWriter(object):
 
     def _copyFontInfo(self, targetInfo, sourceInfo):
         """ Copy the non-calculating fields from the source info.
-            
-            Based on UFO3 info attributes. 
+
+            Based on UFO3 info attributes.
             http://unifiedfontobject.org/versions/ufo3/fontinfo.html
 
             Not all of these fields might be present in UFO2 masters.
-            Not all of these fields will export to UFO2 instances. 
+            Not all of these fields will export to UFO2 instances.
         """
-        targetInfo.versionMajor = sourceInfo.versionMajor
-        targetInfo.versionMinor = sourceInfo.versionMinor
-        targetInfo.copyright = sourceInfo.copyright
-        targetInfo.trademark = sourceInfo.trademark
-        targetInfo.note = sourceInfo.note
-        targetInfo.openTypeGaspRangeRecords = sourceInfo.openTypeGaspRangeRecords
-        #targetInfo.rangeMaxPPEM = sourceInfo.rangeMaxPPEM
-        targetInfo.openTypeHeadCreated = sourceInfo.openTypeHeadCreated
-        targetInfo.openTypeHeadFlags = sourceInfo.openTypeHeadFlags
-        targetInfo.openTypeNameDesigner = sourceInfo.openTypeNameDesigner
-        targetInfo.openTypeNameDesignerURL = sourceInfo.openTypeNameDesignerURL
-        targetInfo.openTypeNameManufacturer = sourceInfo.openTypeNameManufacturer
-        targetInfo.openTypeNameManufacturerURL = sourceInfo.openTypeNameManufacturerURL
-        targetInfo.openTypeNameLicense = sourceInfo.openTypeNameLicense
-        targetInfo.openTypeNameLicenseURL = sourceInfo.openTypeNameLicenseURL
-        targetInfo.openTypeNameVersion = sourceInfo.openTypeNameVersion
-        targetInfo.openTypeNameUniqueID = sourceInfo.openTypeNameUniqueID
-        targetInfo.openTypeNameDescription = sourceInfo.openTypeNameDescription
-        #targetInfo.openTypeNamePreferredFamilyName = sourceInfo.openTypeNamePreferredFamilyName
-        #targetInfo.openTypeNamePreferredSubfamilyName = sourceInfo.openTypeNamePreferredSubfamilyName
-        #targetInfo.openTypeNameCompatibleFullName = sourceInfo.openTypeNameCompatibleFullName
-        targetInfo.openTypeNameSampleText = sourceInfo.openTypeNameSampleText
-        targetInfo.openTypeNameWWSFamilyName = sourceInfo.openTypeNameWWSFamilyName
-        targetInfo.openTypeNameWWSSubfamilyName = sourceInfo.openTypeNameWWSSubfamilyName
-        targetInfo.openTypeNameRecords = sourceInfo.openTypeNameRecords
-        targetInfo.openTypeOS2Selection = sourceInfo.openTypeOS2Selection
-        targetInfo.openTypeOS2VendorID = sourceInfo.openTypeOS2VendorID
-        targetInfo.openTypeOS2Panose = sourceInfo.openTypeOS2Panose
-        targetInfo.openTypeOS2FamilyClass = sourceInfo.openTypeOS2FamilyClass
-        targetInfo.openTypeOS2UnicodeRanges = sourceInfo.openTypeOS2UnicodeRanges
-        targetInfo.openTypeOS2CodePageRanges = sourceInfo.openTypeOS2CodePageRanges
-        targetInfo.openTypeOS2Type = sourceInfo.openTypeOS2Type
-        
-        #targetInfo.postscriptFontName = sourceInfo.postscriptFontName
-        #targetInfo.postscriptFullName = sourceInfo.postscriptFullName
-        targetInfo.postscriptIsFixedPitch = sourceInfo.postscriptIsFixedPitch
-        targetInfo.postscriptForceBold = sourceInfo.postscriptForceBold
-        targetInfo.postscriptDefaultCharacter = sourceInfo.postscriptDefaultCharacter
-        targetInfo.postscriptWindowsCharacterSet = sourceInfo.postscriptWindowsCharacterSet
-        
+
+        fontInfoAttributes = [
+            'versionMajor',
+            'versionMinor',
+            'copyright',
+            'trademark',
+            'note',
+            'openTypeGaspRangeRecords',
+            'rangeMaxPPEM',
+            'openTypeHeadCreated',
+            'openTypeHeadFlags',
+            'openTypeNameDesigner',
+            'openTypeNameDesignerURL',
+            'openTypeNameManufacturer',
+            'openTypeNameManufacturerURL',
+            'openTypeNameLicense',
+            'openTypeNameLicenseURL',
+            'openTypeNameVersion',
+            'openTypeNameUniqueID',
+            'openTypeNameDescription',
+            'openTypeNamePreferredFamilyName',
+            'openTypeNamePreferredSubfamilyName',
+            'openTypeNameCompatibleFullName',
+            'openTypeNameSampleText',
+            'openTypeNameWWSFamilyName',
+            'openTypeNameWWSSubfamilyName',
+            'openTypeNameRecords',
+            'openTypeOS2Selection',
+            'openTypeOS2VendorID',
+            'openTypeOS2Panose',
+            'openTypeOS2FamilyClass',
+            'openTypeOS2UnicodeRanges',
+            'openTypeOS2CodePageRanges',
+            'openTypeOS2Type',
+            'postscriptFontName',
+            'postscriptFullName',
+            'postscriptIsFixedPitch',
+            'postscriptForceBold',
+            'postscriptDefaultCharacter',
+            'postscriptWindowsCharacterSet'
+        ]
+
+        for attrib in fontInfoAttributes:
+            if hasattr(sourceInfo, attrib):
+                targetInfo = sourceInfo
+
+        # targetInfo.versionMajor = sourceInfo.versionMajor
+        # targetInfo.versionMinor = sourceInfo.versionMinor
+        # targetInfo.copyright = sourceInfo.copyright
+        # targetInfo.trademark = sourceInfo.trademark
+        # targetInfo.note = sourceInfo.note
+        # targetInfo.openTypeGaspRangeRecords = sourceInfo.openTypeGaspRangeRecords
+        # #targetInfo.rangeMaxPPEM = sourceInfo.rangeMaxPPEM
+        # targetInfo.openTypeHeadCreated = sourceInfo.openTypeHeadCreated
+        # targetInfo.openTypeHeadFlags = sourceInfo.openTypeHeadFlags
+        # targetInfo.openTypeNameDesigner = sourceInfo.openTypeNameDesigner
+        # targetInfo.openTypeNameDesignerURL = sourceInfo.openTypeNameDesignerURL
+        # targetInfo.openTypeNameManufacturer = sourceInfo.openTypeNameManufacturer
+        # targetInfo.openTypeNameManufacturerURL = sourceInfo.openTypeNameManufacturerURL
+        # targetInfo.openTypeNameLicense = sourceInfo.openTypeNameLicense
+        # targetInfo.openTypeNameLicenseURL = sourceInfo.openTypeNameLicenseURL
+        # targetInfo.openTypeNameVersion = sourceInfo.openTypeNameVersion
+        # targetInfo.openTypeNameUniqueID = sourceInfo.openTypeNameUniqueID
+        # targetInfo.openTypeNameDescription = sourceInfo.openTypeNameDescription
+        # #targetInfo.openTypeNamePreferredFamilyName = sourceInfo.openTypeNamePreferredFamilyName
+        # #targetInfo.openTypeNamePreferredSubfamilyName = sourceInfo.openTypeNamePreferredSubfamilyName
+        # #targetInfo.openTypeNameCompatibleFullName = sourceInfo.openTypeNameCompatibleFullName
+        # targetInfo.openTypeNameSampleText = sourceInfo.openTypeNameSampleText
+        # targetInfo.openTypeNameWWSFamilyName = sourceInfo.openTypeNameWWSFamilyName
+        # targetInfo.openTypeNameWWSSubfamilyName = sourceInfo.openTypeNameWWSSubfamilyName
+        # targetInfo.openTypeNameRecords = sourceInfo.openTypeNameRecords
+        # targetInfo.openTypeOS2Selection = sourceInfo.openTypeOS2Selection
+        # targetInfo.openTypeOS2VendorID = sourceInfo.openTypeOS2VendorID
+        # targetInfo.openTypeOS2Panose = sourceInfo.openTypeOS2Panose
+        # targetInfo.openTypeOS2FamilyClass = sourceInfo.openTypeOS2FamilyClass
+        # targetInfo.openTypeOS2UnicodeRanges = sourceInfo.openTypeOS2UnicodeRanges
+        # targetInfo.openTypeOS2CodePageRanges = sourceInfo.openTypeOS2CodePageRanges
+        # targetInfo.openTypeOS2Type = sourceInfo.openTypeOS2Type
+
+        # #targetInfo.postscriptFontName = sourceInfo.postscriptFontName
+        # #targetInfo.postscriptFullName = sourceInfo.postscriptFullName
+        # targetInfo.postscriptIsFixedPitch = sourceInfo.postscriptIsFixedPitch
+        # targetInfo.postscriptForceBold = sourceInfo.postscriptForceBold
+        # targetInfo.postscriptDefaultCharacter = sourceInfo.postscriptDefaultCharacter
+        # targetInfo.postscriptWindowsCharacterSet = sourceInfo.postscriptWindowsCharacterSet
+
     def addKerning(self, instanceLocation=None, sources=None):
         """
         Calculate the kerning data for this location and add it to this instance.
-        
+
         *   instanceLocation:   Location object
         *   source: dict of {sourcename: (source, sourceLocation)}
         """
@@ -253,11 +299,11 @@ class InstanceWriter(object):
         if self.roundGeometry:
             instanceObject.round()
         instanceObject.extractKerning(self.font)
-        
+
     def addGlyph(self, glyphName, unicodeValue=None, instanceLocation=None, sources=None, note=None):
         """
         Calculate a new glyph and add it to this instance.
-        
+
         *   glyphName:   The name of the glyph
         *   unicodeValue:   The unicode value for this glyph (optional)
         *   instanceLocation:   Location for this glyph
@@ -296,7 +342,7 @@ class InstanceWriter(object):
         except IndexError:
             # probably a compatibility error.
             self._failed.append(glyphName)
-    
+
     def _calculateGlyph(self, targetGlyphObject, instanceLocationObject, glyphMasters):
         """
         Build a Mutator object for this glyph.
@@ -321,8 +367,8 @@ class InstanceWriter(object):
         if self.roundGeometry:
             instanceObject = instanceObject.round()
         instanceObject.extractGlyph(targetGlyphObject, onlyGeometry=True)
-        
+
     def save(self):
         """ Save the UFO."""
         self.font.save(self.path, self.ufoVersion)
-        
+
